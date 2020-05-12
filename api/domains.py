@@ -3,6 +3,16 @@ from flask import abort, make_response
 # Data to serve with our API
 custom_domains = []
 
+# Data to serve with our API
+alumnos = {
+    1: {
+        'id': 1,
+        'nombre': 'Cosme Fulanito',
+        'dni': '11222333',
+        'padron': '88999',
+    },
+}
+
 # Create a handler for our read (GET) people
 def obtener_todos():
     """
@@ -47,7 +57,7 @@ def create_custom_domain(**kwargs):
     new_domain = {
         'domain': domain,
         'ip': ip,
-        'custom': true
+        'custom': True
     }
 
     custom_domains.append(new_domain)
@@ -56,17 +66,23 @@ def create_custom_domain(**kwargs):
 
 def delete_custom_domain(domain):
     """
-    Esta funcion maneja el request DELETE /api/custom-domain/{domain}
+    Esta funcion maneja el request DELETE /api/custom-domains/{domain}
 
     """
 
-    if not any(custom_domain.domains == domain for custom_domain in custom_domains):
+    dup = False
+    for existent_domain in custom_domains:
+        dup = domain == existent_domain.get('domain')
+        if dup:
+            custom_domains.remove(existent_domain)
+            break
+
+    if not dup:
         return abort(404, 'domain not found')
 
-    del custom_domains[domain]
 
     domain_response = {
         'domain': domain
     }
 
-    return make_response(domain_response, 204)
+    return make_response(domain_response, 200)
