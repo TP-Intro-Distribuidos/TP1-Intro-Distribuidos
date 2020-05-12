@@ -1,14 +1,7 @@
 from flask import abort, make_response
 
 # Data to serve with our API
-alumnos = {
-    1: {
-        'id': 1,
-        'nombre': 'Cosme Fulanito',
-        'dni': '11222333',
-        'padron': '88999',
-    },
-}
+custom_domains = []
 
 # Create a handler for our read (GET) people
 def obtener_todos():
@@ -32,44 +25,48 @@ def obtener_uno(id_alumno):
 
     return alumnos.get(id_alumno)
 
-def crear(**kwargs):
+def create_custom_domain(**kwargs):
     """
-    Esta funcion maneja el request POST /api/alumnos
+    Esta funcion maneja el request POST /api/custom-domains
 
-     :param body:  alumno a crear en la lista de alumnos
-    :return:        201 alumno creado, 400 dni o padron duplicado
     """
-    alumno = kwargs.get('body')
-    dni = alumno.get('dni')
-    padron = alumno.get('padron')
-    nombre = alumno.get('nombre')
-    if not dni or not padron or not nombre:
-        return abort(400, 'Faltan datos para crear un alumno')
+    new_domain = kwargs.get('body')
+    domain = new_domain.get('domain')
+    ip = new_domain.get('ip')
+    if not domain or not ip:
+        return abort(400, 'custom domain already exists')
 
     dup = False
-    for alumno_existente in alumnos.values():
-        dup = dni == alumno_existente.get('dni') or padron == alumno_existente.get('padron')
+    for existent_domain in custom_domains:
+        dup = domain == existent_domain.get('domain')
         if dup: break
 
     if dup:
-        return abort(400, 'DNI o Padron ya existentes')
+        return abort(400, 'custom domain already exists')
 
-    new_id = max(alumnos.keys()) + 1
-    alumno['id'] = new_id
-    alumnos[new_id] = alumno
+    new_domain = {
+        'domain': domain,
+        'ip': ip,
+        'custom': true
+    }
 
-    return make_response(alumno, 201)
+    custom_domains.append(new_domain)
 
-def borrar(id_alumno):
+    return make_response(new_domain, 201)
+
+def delete_custom_domain(domain):
     """
-    Esta funcion maneja el request DELETE /api/alumnos/{id_alumno}
+    Esta funcion maneja el request DELETE /api/custom-domain/{domain}
 
-    :id_alumno body:  id del alumno que se quiere borrar
-    :return:        200 alumno, 404 alumno no encontrado
     """
-    if id_alumno not in alumnos:
-        return abort(404, 'El alumno no fue encontrado')
 
-    del alumnos[id_alumno]
+    if not any(custom_domain.domains == domain for custom_domain in custom_domains):
+        return abort(404, 'domain not found')
 
-    return make_response('', 204)
+    del custom_domains[domain]
+
+    domain_response = {
+        'domain': domain
+    }
+
+    return make_response(domain_response, 204)
