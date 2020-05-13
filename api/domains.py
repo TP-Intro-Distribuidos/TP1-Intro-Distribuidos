@@ -35,6 +35,29 @@ def obtener_uno(id_alumno):
 
     return alumnos.get(id_alumno)
 
+def modify_existent_domain(domain, **kwargs):
+    """
+    Esta funcion maneja el request PUT /api/custom-domains/{domain}
+
+    """
+
+    new_domain = kwargs.get('body')
+    domain_body = new_domain.get('domain')
+    ip = new_domain.get('ip')
+
+    if not domain_body or not ip:
+        return abort(400, 'payload is invalid')
+
+    dup = False
+    for existent_domain in custom_domains:
+        dup = domain == existent_domain.get('domain')
+        if dup:
+            existent_domain["ip"] = ip
+            return make_response(existent_domain, 200)
+
+    if not dup:
+        return abort(404, 'domain not found')
+
 def create_custom_domain(**kwargs):
     """
     Esta funcion maneja el request POST /api/custom-domains

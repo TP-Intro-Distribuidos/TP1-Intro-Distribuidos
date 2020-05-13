@@ -59,6 +59,36 @@ paths:
           #      $ref: '#/components/schemas/DeletedCustomDomain'
         404:
           description: "El custom domain no fue encontrado en el sistema"
+    put:
+      operationId: "api.domains.modify_existent_domain"
+      tags:
+      - "CustomDomains"
+      summary: "Modificar la ip de un custom domain"
+      description: "Modifica la ip de un custom domain dado por path variable"
+      parameters:
+      - in: path
+        name: domain
+        required: true
+        description: El domain a modificar
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputCustomDomain'
+      responses:
+        200:
+          description: "El custom domain fue modificado con éxito"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomDomain'
+        400:
+          description: "El body del request está mal formado"
+        404:
+          description: "El custom domain no fue encontrado en el sistema"
 
 # Declaración de tipos de datos
 components:
