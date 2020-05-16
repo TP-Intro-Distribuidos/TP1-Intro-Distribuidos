@@ -10,6 +10,57 @@ servers:
 
 # Paths servidos por la aplicación
 paths:
+  /domains/{domain}:
+    get:
+      operationId: "api.domains.get_domain"
+      tags:
+        - "Domain"
+      summary: "Obtiene la IP asociada a un dominio en particular"
+      description: "Obtiene la IP asociada a un dominio en particular, pudiendo ser este un custom domain creado previamente."
+      parameters:
+        - in: path
+          name: domain
+          required: true
+          schema:
+            type: string
+          description: El nombre de dominio a consultar
+      responses:
+        200:
+          description: "Operación de consulta exitosa"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomDomain'
+        404:
+          description: "No se encontró el dominio en el Resolver"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /custom-domain:
+    get:
+      operationId: "api.domains.get_custom_domains"
+      tags:
+        - "Domain"
+      summary: "Obtiene todas los dominios existentes en el sistema."
+      description: "Devuelve el listado de dominios existentes"
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: query a utilizar para devolver los dominios que la contengan
+      responses:
+        200:
+          description: "Operación de consulta exitosa"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomDomain'
+
   /custom-domains:
     post:
       operationId: "api.domains.create_custom_domain"
@@ -36,6 +87,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
   /custom-domains/{domain}:
     delete:
       operationId: "api.domains.delete_custom_domain"
