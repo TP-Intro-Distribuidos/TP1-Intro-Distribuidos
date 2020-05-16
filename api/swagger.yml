@@ -50,7 +50,7 @@ paths:
           name: q
           schema:
             type: string
-          description: query a utilizar para devolver los dominios que la contengan
+          description: Filtro a aplicarse sobre los nombres de dominio
       responses:
         200:
           description: "Operación de consulta exitosa"

@@ -67,9 +67,9 @@ def get_domain(domain):
         if (len(result)) > 0:
             return make_response(dns_answer_to_custom_domain(domain, result), 200)
     except:
-        return abort(404, 'domain not found')
+        return make_response({'error': 'domain not found'}, 404)
 
-    return abort(404, 'domain not found')
+    return make_response({'error': 'domain not found'}, 404)
 
 
 def dns_answer_to_custom_domain(domain, result):
