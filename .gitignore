@@ -1,5 +1,6 @@
 .venv
 .vscode
+TP1-Intro-Distribuidos.iml
 
 __pycache__/
 .idea/

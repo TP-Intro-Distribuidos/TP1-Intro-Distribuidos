@@ -38,13 +38,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /custom-domain:
+  /custom-domains:
     get:
       operationId: "api.domains.get_custom_domains"
       tags:
-        - "Domain"
-      summary: "Obtiene todas los dominios existentes en el sistema."
-      description: "Devuelve el listado de dominios existentes"
+        - "CustomDomains"
+      summary: "Colección de los dominios existentes"
+      description: "Devuelve el listado de dominios existentes en el sistema"
       parameters:
         - in: query
           name: q
@@ -57,11 +57,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CustomDomain'
-
-  /custom-domains:
+                $ref: '#/components/schemas/CustomDomains'
     post:
       operationId: "api.domains.create_custom_domain"
       tags:
@@ -154,6 +150,13 @@ components:
           type: "string"
         custom:
           type: "boolean"
+    CustomDomains:
+      type: "object"
+      properties:
+        items:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/CustomDomain'
     InputCustomDomain:
       type: "object"
       properties:

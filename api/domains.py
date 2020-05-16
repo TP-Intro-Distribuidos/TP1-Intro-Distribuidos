@@ -1,4 +1,4 @@
-from flask import abort, make_response
+from flask import make_response, jsonify
 import dns.resolver
 
 # Data to serve with our API
@@ -9,41 +9,6 @@ custom_domains = [
         "ip": "192.33.22.11"
     }
 ]
-
-# Data to serve with our API
-alumnos = {
-    1: {
-        'id': 1,
-        'nombre': 'Cosme Fulanito',
-        'dni': '11222333',
-        'padron': '88999',
-    },
-}
-
-
-# Create a handler for our read (GET) people
-def obtener_todos():
-    """
-    Esta funcion maneja el request GET /api/alumnos
-
-    :return:        200 lista ordenada alfabeticamente de alumnos de la materia
-    """
-    # Create the list of people from our data
-    return sorted(alumnos.values(), key=lambda alumno: alumno.get('nombre'))
-
-
-def obtener_uno(id_alumno):
-    """
-    Esta funcion maneja el request GET /api/alumnos/{id_alumno}
-
-     :id_alumno body:  id del alumno que se quiere obtener
-    :return:        200 alumno, 404 alumno no encontrado
-    """
-    if id_alumno not in alumnos:
-        return abort(404, 'El alumno no fue encontrado')
-
-    return alumnos.get(id_alumno)
-
 
 # Provided examples separator
 def get_domain(domain):
@@ -84,15 +49,14 @@ def dns_answer_to_custom_domain(domain, result):
 
 def get_custom_domains(**kwargs):
     """
-    Devuelve el listado de dominios existentes que matcheen con el string provist.
+    Devuelve el listado de dominios existentes que matcheen con el string provisto.
     :return:    200 custom domains que matcheen con la query o vacio.
     """
     query = kwargs.get('q')
     if query is None:
         return custom_domains
 
-    return list(filter(lambda d: str(query) in d.get('domain'), custom_domains))
-
+    return jsonify(items=list(filter(lambda d: str(query) in d.get('domain'), custom_domains)))
 
 def modify_existent_domain(domain, **kwargs):
     """
