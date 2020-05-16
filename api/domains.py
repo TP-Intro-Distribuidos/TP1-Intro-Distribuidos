@@ -105,7 +105,7 @@ def modify_existent_domain(domain, **kwargs):
     ip = new_domain.get('ip')
 
     if not domain_body or not ip:
-        return abort(400, 'payload is invalid')
+        return make_response({'error': 'payload is invalid'}, 400)
 
     dup = False
     for existent_domain in custom_domains:
@@ -115,7 +115,7 @@ def modify_existent_domain(domain, **kwargs):
             return make_response(existent_domain, 200)
 
     if not dup:
-        return abort(404, 'domain not found')
+        return make_response({'error': 'domain not found'}, 404)
 
 
 def create_custom_domain(**kwargs):
@@ -126,8 +126,9 @@ def create_custom_domain(**kwargs):
     new_domain = kwargs.get('body')
     domain = new_domain.get('domain')
     ip = new_domain.get('ip')
+
     if not domain or not ip:
-        return abort(400, 'custom domain already exists')
+        return make_response({'error': 'custom domain already exists'}, 400)
 
     dup = False
     for existent_domain in custom_domains:
@@ -135,7 +136,7 @@ def create_custom_domain(**kwargs):
         if dup: break
 
     if dup:
-        return abort(400, 'custom domain already exists')
+        return make_response({'error': 'custom domain already exists'}, 400)
 
     new_domain = {
         'domain': domain,
@@ -162,7 +163,7 @@ def delete_custom_domain(domain):
             break
 
     if not dup:
-        return abort(404, 'domain not found')
+        return make_response({'error': 'domain not found'}, 404)
 
     domain_response = {
         'domain': domain
