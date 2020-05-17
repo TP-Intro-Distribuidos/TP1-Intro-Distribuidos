@@ -1,5 +1,7 @@
-from flask import make_response, jsonify
 import dns.resolver
+from flask import make_response, jsonify
+import datetime
+from itertools import cycle
 
 # Data to serve with our API
 custom_domains = [
@@ -9,6 +11,22 @@ custom_domains = [
         "ip": "192.33.22.11"
     }
 ]
+
+cached_domains = {}
+
+
+class DomainInformation:
+
+    def __init__(self, ips, ttl):
+        self.iterator = cycle(ips)
+        self.expiration = datetime.datetime.now() + datetime.timedelta(seconds=ttl)
+
+    def is_still_valid(self):
+        return self.expiration > datetime.datetime.now()
+
+    def get_next_ip(self):
+        return next(self.iterator)
+
 
 # Provided examples separator
 def get_domain(domain):
@@ -21,29 +39,39 @@ def get_domain(domain):
     :return:    200 dominio, 404 dominio no encontrado.
     """
 
-    # First we search in our local list
+    # First we search in our local list of custom domains
     localList = list(filter(lambda d: d.get('domain') == domain, custom_domains))
     if len(localList) > 0:
         return localList[0]
+
+    # If not, we search in our cache
+    if domain in cached_domains:
+        domain_info = cached_domains[domain]
+        if domain_info.is_still_valid():
+            return make_response(format_answer(domain, domain_info.get_next_ip()), 200)
 
     # If not, we get the list from the real DNS resolver
     try:
         result = dns.resolver.query(domain)
         if (len(result)) > 0:
-            return make_response(dns_answer_to_custom_domain(domain, result), 200)
+            list_of_ips = []
+            ttl = result.rrset.ttl
+            for res in result:
+                print(res.to_text())
+                list_of_ips.append(res.to_text())
+            cached_domains[domain] = DomainInformation(list_of_ips, ttl)
+            return make_response(format_answer(domain, cached_domains[domain].get_next_ip()), 200)
     except:
         return make_response({'error': 'domain not found'}, 404)
 
     return make_response({'error': 'domain not found'}, 404)
 
 
-def dns_answer_to_custom_domain(domain, result):
-    # for answer in result.response.answer:
-    #     print(answer)
+def format_answer(domain, ip):
     return {
         "custom": "false",
         "domain": domain,
-        "ip": str(result.response.answer[0][0])
+        "ip": str(ip)
     }
 
 
@@ -57,6 +85,7 @@ def get_custom_domains(**kwargs):
         return custom_domains
 
     return jsonify(items=list(filter(lambda d: str(query) in d.get('domain'), custom_domains)))
+
 
 def modify_existent_domain(domain, **kwargs):
     """
