@@ -56,7 +56,6 @@ def get_domain(domain):
         if (len(result)) > 0:
             list_of_ips = []
             for res in result:
-                print(res.to_text())
                 list_of_ips.append(res.to_text())
             cached_domains[domain] = DomainInformation(list_of_ips, result.ttl)
             return make_response(format_answer(domain, cached_domains[domain].get_next_ip()), 200)
