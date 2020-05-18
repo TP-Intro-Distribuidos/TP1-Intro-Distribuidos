@@ -99,14 +99,18 @@ paths:
           schema:
             type: string
       responses:
-        204:
+        200:
           description: "El custom domain fue borrado con éxito"
-          #content:
-          #  application/json:
-          #    schema:
-          #      $ref: '#/components/schemas/DeletedCustomDomain'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletedCustomDomain'
         404:
           description: "El custom domain no fue encontrado en el sistema"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     put:
       operationId: "api.domains.modify_existent_domain"
       tags:
@@ -135,8 +139,16 @@ paths:
                 $ref: '#/components/schemas/CustomDomain'
         400:
           description: "El body del request está mal formado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         404:
           description: "El custom domain no fue encontrado en el sistema"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 # Declaración de tipos de datos
 components:
@@ -169,8 +181,8 @@ components:
       properties:
         error:
           type: "string"
-    #DeletedCustomDomain:
-    #  type: "object"
-    #  properties:
-    #    domain:
-    #      tyoe: "string"
+    DeletedCustomDomain:
+      type: "object"
+      properties:
+        domain:
+          type: "string"

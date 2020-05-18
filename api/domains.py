@@ -4,13 +4,7 @@ import datetime
 from itertools import cycle
 
 # Data to serve with our API
-custom_domains = [
-    {
-        "custom": "true",
-        "domain": "a.b.c",
-        "ip": "192.33.22.11"
-    }
-]
+custom_domains = []
 
 cached_domains = {}
 
@@ -67,7 +61,7 @@ def get_domain(domain):
 
 def format_answer(domain, ip):
     return {
-        "custom": "false",
+        "custom": False,
         "domain": domain,
         "ip": str(ip)
     }
