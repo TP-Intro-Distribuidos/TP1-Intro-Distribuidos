@@ -25,14 +25,9 @@ class DomainInformation:
 # Provided examples separator
 def get_domain(domain):
     """
-    Obtiene la IP asociada a un dominio en particular, pudiendo ser este un custom domain
-    creado previamente. Si en hostname tiene varias IPs distintas, el servicio deberá devolver
-    sólo una. Sin embargo, si se vuelve a pedir la IP de ese dominio, deberá irse alternando
-    entre las que provee el resolver de DNS en forma de round robin.
-    :param domain:  El dominio que se quiere consultar
-    :return:    200 dominio, 404 dominio no encontrado.
-    """
-
+   Devuelve la IP asociada a un dominio en particular
+   :return:    200 dominio, 404 dominio no encontrado.
+   """
     # First we search in our local list of custom domains
     localList = list(filter(lambda d: d.get('domain') == domain, custom_domains))
     if len(localList) > 0:
@@ -74,7 +69,7 @@ def get_custom_domains(**kwargs):
     """
     query = kwargs.get('q')
     if query is None:
-        return custom_domains
+        return make_response({'items': custom_domains})
 
     return jsonify(items=list(filter(lambda d: str(query) in d.get('domain'), custom_domains)))
 
