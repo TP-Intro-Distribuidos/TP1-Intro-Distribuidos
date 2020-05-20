@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
   version: "1.0.0"
-  title: API de Alumnos
-  description: Documentación de la API de Alumnos de la materia 75.43 Introducción a Sistemas Distribuidos
+  title: DoH
+  description: Versión simplificada de DoH (DNS over HTTPS)
 
 servers:
   - url: http://localhost:8080/api
@@ -10,112 +10,179 @@ servers:
 
 # Paths servidos por la aplicación
 paths:
-  /alumnos:
+  /domains/{domain}:
     get:
-      operationId: "api.alumnos.obtener_todos"
+      operationId: "api.domains.get_domain"
       tags:
-        - "Alumnos"
-      summary: "Colección de alumnos de la materia"
-      description: "Obtiene la lista de todos los alumnos de la materia existentes en el sistema"
+        - "Domain"
+      summary: "Obtiene la IP asociada a un dominio en particular"
+      description: "Obtiene la IP asociada a un dominio en particular, pudiendo ser este un custom domain creado previamente."
+      parameters:
+        - in: path
+          name: domain
+          required: true
+          schema:
+            type: string
+          description: El nombre de dominio a consultar
       responses:
         200:
-          description: "Operación de lectura exitosa"
+          description: "Operación de consulta exitosa"
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Alumno'
-    post:
-      operationId: "api.alumnos.crear"
+                $ref: '#/components/schemas/CustomDomain'
+        404:
+          description: "No se encontró el dominio en el Resolver"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /custom-domains:
+    get:
+      operationId: "api.domains.get_custom_domains"
       tags:
-        - "Alumnos"
-      summary: "Alta de un alumno de la materia"
-      description: "Crea un nuevo alumno y lo agrega a la lista de alumnos de la materia"
+        - "CustomDomains"
+      summary: "Colección de los dominios existentes"
+      description: "Devuelve el listado de dominios existentes en el sistema"
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Filtro a aplicarse sobre los nombres de dominio
+      responses:
+        200:
+          description: "Operación de consulta exitosa"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomDomains'
+    post:
+      operationId: "api.domains.create_custom_domain"
+      tags:
+        - "CustomDomains"
+      summary: "Alta de un custom domain al sistema"
+      description: "Crea un nuevo custom domain y lo guarda en memoria"
       requestBody:
         required: true
-        x-body-name: 'alumno'
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/InputAlumno'
+              $ref: '#/components/schemas/InputCustomDomain'
       responses:
         201:
-          description: "Se creo el alumno correctamente"
+          description: "Se creo el custom domain correctamente"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Alumno'
+                $ref: '#/components/schemas/CustomDomain'
         400:
-          description: "DNI o padron duplicado"
-  /alumnos/{id_alumno}:
-    get:
-      operationId: "api.alumnos.obtener_uno"
+          description: "El custom domain ya fue creado con anterioridad, o se quiso crear con algún campo faltante"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /custom-domains/{domain}:
+    delete:
+      operationId: "api.domains.delete_custom_domain"
       tags:
-        - "Alumnos"
-      summary: "Alumno de la materia"
-      description: "Obtiene un alumno particular de la materia"
+        - "CustomDomains"
+      summary: "Borrar un custom domain del sistema"
+      description: "Borra un custom domain del sistema"
       parameters:
         - in: path
-          name: id_alumno
+          name: domain
           required: true
+          description: El domain a borrar
           schema:
-            type: integer
-          description: El id del usuario a obtener
+            type: string
       responses:
         200:
-          description: "Operación de lectura exitosa"
+          description: "El custom domain fue borrado con éxito"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Alumno'
+                $ref: '#/components/schemas/DeletedCustomDomain'
         404:
-          description: "Alumno no encontrado"
-    delete:
-      operationId: "api.alumnos.borrar"
+          description: "El custom domain no fue encontrado en el sistema"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      operationId: "api.domains.modify_existent_domain"
       tags:
-        - "Alumnos"
-      summary: "Borrar alumno de la materia"
-      description: "Borra un alumno de la materia"
+      - "CustomDomains"
+      summary: "Modificar la ip de un custom domain"
+      description: "Modifica la ip de un custom domain dado por path variable"
       parameters:
-        - in: path
-          name: id_alumno
-          required: true
-          schema:
-            type: integer
-          description: El id del usuario a borrar
+      - in: path
+        name: domain
+        required: true
+        description: El domain a modificar
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputCustomDomain'
       responses:
-        204:
-          description: "Operación de lectura exitosa"
+        200:
+          description: "El custom domain fue modificado con éxito"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomDomain'
+        400:
+          description: "El body del request está mal formado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         404:
-          description: "Alumno no encontrado"
+          description: "El custom domain no fue encontrado en el sistema"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 # Declaración de tipos de datos
 components:
   schemas:
-    Alumno:
+    CustomDomain:
       type: "object"
       properties:
-        id:
-          type: "number"
-        nombre:
+        domain:
           type: "string"
-        dni:
+        ip:
           type: "string"
-        padron:
-          type: "string"
-    InputAlumno:
+        custom:
+          type: "boolean"
+    CustomDomains:
       type: "object"
       properties:
-        nombre:
+        items:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/CustomDomain'
+    InputCustomDomain:
+      type: "object"
+      properties:
+        domain:
           type: "string"
-        dni:
-          type: "string"
-        padron:
+        ip:
           type: "string"
     Error:
       type: "object"
       properties:
-        codigo:
-          type: "number"
-        mensaje:
+        error:
+          type: "string"
+    DeletedCustomDomain:
+      type: "object"
+      properties:
+        domain:
           type: "string"
